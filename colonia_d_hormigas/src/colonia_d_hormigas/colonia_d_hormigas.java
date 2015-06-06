@@ -31,13 +31,25 @@ public class  colonia_d_hormigas {
 			System.out.println("Escribir Nodo final");
 			nodoFinal = leer.nextInt();
 			
+			nodoFinal-=1;
+			
+			  // iniciar martiz feromona
+	   		for (int i = 0; i < feromona.length; i++) {
+	   			
+	   			for (int j = 0; j < feromona.length; j++) {
+	   				feromona[i][j]=1;
+	   			}
+	   			
+	   		}	
 			
 			for (int i = 0; i < Num_hormigas; i++) {
+				
 		    System.out.println("Hormiga "+(i+1));
 				recorrer(Red,nodoFinal,feromona);
-				System.out.println();	
-			}
+				System.out.println();
 				
+			}
+			
 	}
 	
 public static void Mostrar_red(int Red[][]){
@@ -53,39 +65,35 @@ public static void Mostrar_red(int Red[][]){
 	
 	System.out.println();
 }
-	
 
 public static void recorrer(int Red[][], int nodoFinal, double feromona[][]){
 
 	// nodo de la red 
 	int nodo=0;     
-	// columna de la red   
+	// nodos que ha visitado la hormiga 
+	ArrayList<Integer> Nodos_visitados = new ArrayList<Integer>();
 	// red temporal para recorrido de las hormigas
 	int [][] red_temporal = new int[Red.length][Red.length];
+	double feromona_antes[][]= new double [feromona.length][feromona.length];
 	    
 	       //Genera copia temporal
 	   	   clonar_Red(Red,red_temporal); 
-	
-	        // iniciar martiz feromona
-	   		for (int i = 0; i < feromona.length; i++) {
-	   			
-	   			for (int j = 0; j < feromona.length; j++) {
-	   				feromona[i][j]=1;
-	   			}
-	   			
-	   		}	
-	 System.out.print("Ruta 1"); 		
+	   	   clonar_feromona(feromona,feromona_antes);
+	      
+	 System.out.print("Ruta 1"); 
+	 Nodos_visitados.add(0);
 	while(nodo != nodoFinal){
 	   				
-		nodo = elegir_camino(red_temporal,nodo,feromona);
+		nodo = elegir_camino(red_temporal,nodo,feromona,feromona_antes,Red,Nodos_visitados);
 		if (nodo==-1) {
 			System.out.print("Hormiga muerta");
 			break;
 		}
-		System.out.print(+(nodo+1)); 
-		
+		System.out.print(+(nodo+1));
+		Nodos_visitados.add(nodo);
 	} //End while
-	System.out.println();	
+	System.out.println();
+	Nodos_visitados.clear();	
 	}
 
 public static void  clonar_Red(int Red[][],int red_temporal[][]){
@@ -100,7 +108,18 @@ public static void  clonar_Red(int Red[][],int red_temporal[][]){
 	
 }
 
-public static int elegir_camino(int red_temporal[][], int nodo, double feromona[][]){
+public static void clonar_feromona(double feromona[][],double feromona_antes[][]){
+	for (int i = 0; i < feromona.length; i++) {
+			
+		for (int j = 0; j < feromona.length; j++) {
+			feromona_antes[i][j]=feromona[i][j];
+		}
+			
+		}
+
+}
+
+public static int elegir_camino(int red_temporal[][], int nodo, double feromona[][],double feromona_antes[][],int Red[][],ArrayList<Integer>Nodos_visitados){
 		
 		double evaluacion=0;
 		double random;    
@@ -108,6 +127,7 @@ public static int elegir_camino(int red_temporal[][], int nodo, double feromona[
 		ArrayList<Integer> NodosBuenos = new ArrayList<Integer>();
 		double feromonas=0;
 		int nodo_siguiente = -1;
+		double variacion_feromona=0;
 		System.out.print(" --> ");
 		//Obtener nodos viables
 		
@@ -142,12 +162,52 @@ public static int elegir_camino(int red_temporal[][], int nodo, double feromona[
 			}	
 		}
 		
+		
 		// eliminar de la red temporal la columna actual
 		for (int i = 0; i < red_temporal[nodo].length; i++) {  
 			red_temporal[i][nodo]=-1;
 		}
 		
 		NodosBuenos.clear();
+		
+		if (nodo_siguiente==-1) {
+		   
+		}
+		else{
+			variacion_feromona=feromona[nodo][nodo_siguiente]-(Red[nodo][nodo_siguiente]*0.01);
+		}
+		
+		if (nodo_siguiente==-1) {
+			
+			for (int i = 0; i < feromona.length; i++) {
+				
+				for (int j = 0; j < feromona.length; j++) {
+					
+					feromona[i][j]=feromona_antes[i][j];
+					
+				}
+				
+			}
+			
+		}
+		else{
+			
+			for (int i = 1; i < Nodos_visitados.size(); i++) {
+				
+				if (Nodos_visitados.get(i-1)==nodo && Nodos_visitados.get(i)==nodo_siguiente) {
+					
+					feromona[Nodos_visitados.get(i-1)][Nodos_visitados.get(i)]+=variacion_feromona;
+					
+				}
+				else{
+					
+					feromona[Nodos_visitados.get(i-1)][Nodos_visitados.get(i)]-=variacion_feromona;
+					
+				}
+				
+			}
+			
+		}
 		
 		nodo=nodo_siguiente;
 		
