@@ -1,9 +1,12 @@
 package colonia_d_hormigas;
 
 import java.util.*;
+import java.text.DecimalFormat;
 
 public class  colonia_d_hormigas {
+	static DecimalFormat formateador = new DecimalFormat("0.00");
 	public static Scanner leer;
+	static int costo=0;
 		public static void main(String[] args) {
 			
 			leer = new Scanner(System.in);
@@ -22,6 +25,7 @@ public class  colonia_d_hormigas {
 			double [][] feromona = new double[Red.length][Red.length];
 			int Num_hormigas; // Número de hormigas que se van a pasar por la red para determina el costo minimo
 			int nodoFinal;
+			
 			
 			Mostrar_red(Red); 
 			
@@ -50,6 +54,35 @@ public class  colonia_d_hormigas {
 				
 			}
 			
+			int nodo_sol = 0;
+			System.out.println("Camino Final");
+			double mayor_temp;
+			int temp_index_sol;
+			int costo_final=0;
+			int columna=0;
+			while(nodo_sol != nodoFinal)
+			{
+				System.out.print((nodo_sol+1) + " --> ");
+				
+				mayor_temp = feromona[nodo_sol][0];
+				temp_index_sol = 0;
+				
+				for(int i = 1; i < feromona.length; i++)
+				{
+					if(feromona[nodo_sol][i] > mayor_temp)
+					{
+						mayor_temp = feromona[nodo_sol][i];
+						temp_index_sol = i;
+						columna=i;
+					}	
+				}
+				costo_final+=Red[nodo_sol][columna];
+				nodo_sol = temp_index_sol;
+			}
+			System.out.println(11);
+			System.out.println("Costo Final del camino "+costo_final);
+			
+			
 	}
 	
 public static void Mostrar_red(int Red[][]){
@@ -75,6 +108,7 @@ public static void recorrer(int Red[][], int nodoFinal, double feromona[][]){
 	// red temporal para recorrido de las hormigas
 	int [][] red_temporal = new int[Red.length][Red.length];
 	double feromona_antes[][]= new double [feromona.length][feromona.length];
+	
 	    
 	       //Genera copia temporal
 	   	   clonar_Red(Red,red_temporal); 
@@ -85,14 +119,17 @@ public static void recorrer(int Red[][], int nodoFinal, double feromona[][]){
 	while(nodo != nodoFinal){
 	   				
 		nodo = elegir_camino(red_temporal,nodo,feromona,feromona_antes,Red,Nodos_visitados);
+		
 		if (nodo==-1) {
 			System.out.print("Hormiga muerta");
 			break;
 		}
 		System.out.print(+(nodo+1));
-		Nodos_visitados.add(nodo);
+		
 	} //End while
 	System.out.println();
+	System.out.println("costo del camino "+costo);
+	costo=0;
 	Nodos_visitados.clear();	
 	}
 
@@ -128,6 +165,7 @@ public static int elegir_camino(int red_temporal[][], int nodo, double feromona[
 		double feromonas=0;
 		int nodo_siguiente = -1;
 		double variacion_feromona=0;
+		int indice;
 		System.out.print(" --> ");
 		//Obtener nodos viables
 		
@@ -162,7 +200,7 @@ public static int elegir_camino(int red_temporal[][], int nodo, double feromona[
 			}	
 		}
 		
-		
+		Nodos_visitados.add(nodo_siguiente);
 		// eliminar de la red temporal la columna actual
 		for (int i = 0; i < red_temporal[nodo].length; i++) {  
 			red_temporal[i][nodo]=-1;
@@ -174,7 +212,7 @@ public static int elegir_camino(int red_temporal[][], int nodo, double feromona[
 		   
 		}
 		else{
-			variacion_feromona=feromona[nodo][nodo_siguiente]-(Red[nodo][nodo_siguiente]*0.01);
+			variacion_feromona=(Red[nodo][nodo_siguiente]*0.01);
 		}
 		
 		if (nodo_siguiente==-1) {
@@ -196,7 +234,7 @@ public static int elegir_camino(int red_temporal[][], int nodo, double feromona[
 				
 				if (Nodos_visitados.get(i-1)==nodo && Nodos_visitados.get(i)==nodo_siguiente) {
 					
-					feromona[Nodos_visitados.get(i-1)][Nodos_visitados.get(i)]+=variacion_feromona;
+					feromona[Nodos_visitados.get(i-1)][Nodos_visitados.get(i)]+=1;
 					
 				}
 				else{
@@ -208,7 +246,13 @@ public static int elegir_camino(int red_temporal[][], int nodo, double feromona[
 			}
 			
 		}
-		
+		if(nodo_siguiente==-1){
+			
+		}
+		else{
+		indice=Red[nodo][nodo_siguiente];
+		costo=costo + indice;
+		}
 		nodo=nodo_siguiente;
 		
 		return nodo_siguiente;
